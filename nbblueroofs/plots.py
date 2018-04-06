@@ -156,12 +156,12 @@ def plot_plotly(chart, width='100%', height=525):
     return figure
 
 
-def plot_ribbon(df, x, ylower, yupper, name, ylab, ymax_factor=1):
+def plot_ribbon(df, x, ylower, yupper, name, ylab, ymax_factor=1, fillcolor='rgba(21,40,166,0.2)'):
     # Create a trace
     trace1 = go.Scatter(x=df[x],
                         y=df[yupper],
                         fill='tonexty',
-                        fillcolor='rgba(0,100,80,0.2)',
+                        fillcolor=fillcolor,
                         line=Line(color='transparent'),
                         showlegend=False,
                         name=name)
