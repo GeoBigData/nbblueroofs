@@ -12,7 +12,8 @@ from plotly.offline.offline import _plot_html
 from plotly.graph_objs import Line
 
 # CONSTANTS
-TMS_1030010067C11400 = 'https://s3.amazonaws.com/notebooks-small-tms/103001001B172A00/{z}/{x}/{y}.png'
+TMS_1040010039BAAF00 = 'https://s3.amazonaws.com/notebooks-small-tms/1030010067C11400/{z}/{x}/{y}.png'
+
 COLORS = {'gray'       : '#8F8E8E',
           'white'      : '#FFFFFF',
           'brightgreen': '#00FF17',
