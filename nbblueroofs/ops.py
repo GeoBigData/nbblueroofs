@@ -57,16 +57,21 @@ def labels_to_polygons(labels_array, image_affine, ignore_label=0):
     return polygons
 
 
-def find_blue_polys(image, lower_blue_hue=.63, upper_blue_hue=.67, segment_blobs=True):
-    rgb = image.rgb()
+def find_blue_polys(image, lower_blue_hue=.60, upper_blue_hue=.67, segment_blobs=True, blm=True,
+                    min_size=120, blobs_erosion=10, binary_opening_radius=2):
+
+    if blm is True:
+        rgb = image.base_layer_match(blm=True, access_token=os.environ.get('MAPBOX_API_KEY'))
+    else:
+        rgb = image.rgb()
     hsv = color.rgb2hsv(rgb)
     mask = (hsv[:, :, 0] <= upper_blue_hue) & (hsv[:, :, 0] >= lower_blue_hue)
-    selem = morphology.disk(radius=2)
+    selem = morphology.disk(radius=binary_opening_radius)
     mask_cleaned = morphology.binary_opening(mask, selem=selem)
-    mask_cleaned = morphology.remove_small_objects(mask_cleaned, min_size=120, connectivity=1)
-    mask_cleaned = morphology.remove_small_holes(mask_cleaned, min_size=120, connectivity=1)
+    mask_cleaned = morphology.remove_small_objects(mask_cleaned, min_size=min_size, connectivity=1)
+    mask_cleaned = morphology.remove_small_holes(mask_cleaned, min_size=min_size, connectivity=1)
     if segment_blobs is True:
-        selem = morphology.disk(radius=10)
+        selem = morphology.disk(radius=blobs_erosion)
         cores = morphology.label(morphology.erosion(mask_cleaned, selem=selem))
         edges = morphology.label(mask_cleaned)
         edge_distance = ndi.distance_transform_edt(edges)
