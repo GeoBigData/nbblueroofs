@@ -57,7 +57,7 @@ def labels_to_polygons(labels_array, image_affine, ignore_label=0):
     return polygons
 
 
-def find_blue_polys(image, lower_blue_hue=.60, upper_blue_hue=.67, segment_blobs=True, blm=True,
+def find_blue_polys(image, lower_blue_hue=.63, upper_blue_hue=.67, segment_blobs=True, blm=False,
                     min_size=120, blobs_erosion=10, binary_opening_radius=2):
 
     if blm is True:
