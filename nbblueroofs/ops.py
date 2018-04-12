@@ -58,14 +58,15 @@ def labels_to_polygons(labels_array, image_affine, ignore_label=0):
 
 
 def find_blue_polys(image, lower_blue_hue=.63, upper_blue_hue=.67, segment_blobs=True, blm=False,
-                    min_size=120, blobs_erosion=10, binary_opening_radius=2):
+                    min_size=120, blobs_erosion=10, binary_opening_radius=2, lower_blue_saturation=0.0):
 
     if blm is True:
         rgb = image.base_layer_match(blm=True, access_token=os.environ.get('MAPBOX_API_KEY'))
     else:
         rgb = image.rgb()
     hsv = color.rgb2hsv(rgb)
-    mask = (hsv[:, :, 0] <= upper_blue_hue) & (hsv[:, :, 0] >= lower_blue_hue)
+    mask = ((hsv[:, :, 0] <= upper_blue_hue) & (hsv[:, :, 0] >= lower_blue_hue) &
+            (hsv[:, :, 1] >= lower_blue_saturation))
     selem = morphology.disk(radius=binary_opening_radius)
     mask_cleaned = morphology.binary_opening(mask, selem=selem)
     mask_cleaned = morphology.remove_small_objects(mask_cleaned, min_size=min_size, connectivity=1)
