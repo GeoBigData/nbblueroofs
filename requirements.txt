@@ -11,3 +11,5 @@ scipy
 pandas
 rasterio
 gbdxtools
+tqdm
+pandas

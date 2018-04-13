@@ -9,6 +9,9 @@ from skimage import filters, morphology, measure, color, segmentation
 from scipy import ndimage as ndi
 from gbdxtools import CatalogImage
 from gbdxtools.ipe.error import AcompUnavailable
+import tqdm
+import pandas as pd
+from functools import partial
 
 # CONSTANTS
 osm_buildings_san_juan = 'https://s3.amazonaws.com/gbdx-training/blue_roofs/hotosm_pri_building_polygons_san_juan.geojson'
@@ -100,7 +103,7 @@ def analyze_area(area_name, bbox, catids, buildings_geojson):
     area_name_title = area_name.replace("_", " ").title()
     # Get building footprints from OSM for this area
     if buildings_geojson is not None:
-        geoms, buildings = nbblueroofs.from_geojson(buildings_geojson)
+        geoms, buildings = from_geojson(buildings_geojson)
     # instantiate an empty list to hold the results from each building
     results_list = []
     for catid in tqdm.tqdm(catids):
@@ -113,11 +116,11 @@ def analyze_area(area_name, bbox, catids, buildings_geojson):
         cimage._read = partial(cimage._read, quiet=True)
 
         # find the blue buildings
-        blue_polys = nbblueroofs.find_blue_polys(cimage, lower_blue_hue=.63, upper_blue_hue=.67,
+        blue_polys = find_blue_polys(cimage, lower_blue_hue=.63, upper_blue_hue=.67,
                                                  segment_blobs=True, lower_blue_saturation=.3)
 
         if buildings_geojson is not None:
-            blue_bldgs = nbblueroofs.filter_blue_polys(blue_polys, buildings)
+            blue_bldgs = filter_blue_polys(blue_polys, buildings)
         else:
             blue_bldgs = blue_polys
         # Store the image acquisition date
