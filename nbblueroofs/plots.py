@@ -196,3 +196,34 @@ def plot_results(df, x, y, name, ylab, ymax_factor=1):
     fig = go.Figure(data=graph_data, layout=graph_layout)
 
     return fig
+
+
+def plot_multi_trace(df, x, y, factor_var, ymax_factor=1.):
+    graph_layout = go.Layout(showlegend=True)
+
+    graph_data = []
+    factor_vals = df[factor_var].unique()
+    domain_breaks = np.linspace(0, 1, len(factor_vals) + 1)
+    for i, factor_val in enumerate(factor_vals):
+        df_subset = df[df[factor_var] == factor_val]
+        # Create a trace
+        x_anchor = 'x1'
+        y_anchor = 'y{}'.format(i + 1)
+        new_trace = go.Scatter(x=df_subset[x],
+                               y=df_subset[y],
+                               name=factor_val,
+                               mode='lines+markers',
+                               xaxis=x_anchor,
+                               yaxis=y_anchor)
+        graph_data.append(new_trace)
+        yaxis = dict(range=(0, max(df_subset[y]) * ymax_factor),
+                     anchor=x_anchor,
+                     domain=(domain_breaks[i], domain_breaks[i + 1] - 0.03))
+        if i == 0:
+            y_axis_name = 'yaxis'
+        else:
+            y_axis_name = 'yaxis{}'.format(i + 1)
+        graph_layout[y_axis_name] = yaxis.copy()
+    fig = go.Figure(data=graph_data, layout=graph_layout)
+
+    return fig

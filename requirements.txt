@@ -10,3 +10,4 @@ scikit-image
 scipy
 pandas
 rasterio
+gbdxtools

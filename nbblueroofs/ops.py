@@ -7,11 +7,14 @@ import requests
 import os
 from skimage import filters, morphology, measure, color, segmentation
 from scipy import ndimage as ndi
-
+from gbdxtools import CatalogImage
+from gbdxtools.ipe.error import AcompUnavailable
 
 # CONSTANTS
-osm_buildings_sanjuan = 'https://s3.amazonaws.com/gbdx-training/blue_roofs/hotosm_pri_building_polygons_san_juan.geojson'
-
+osm_buildings_san_juan = 'https://s3.amazonaws.com/gbdx-training/blue_roofs/hotosm_pri_building_polygons_san_juan.geojson'
+osm_buildings_toa_alta = 'https://s3.amazonaws.com/gbdx-training/blue_roofs/hotosm_pri_building_polygons_toa_alta.geojson'
+osm_buildings_corozal = 'https://s3.amazonaws.com/gbdx-training/blue_roofs/hotosm_pri_building_polygons_corozal.geojson'
+osm_buildings_quebradillas = 'https://s3.amazonaws.com/gbdx-training/blue_roofs/hotosm_pri_building_polygons_quebradillas.geojson'
 
 # FUNCTIONS
 def from_geojson(source):
@@ -92,6 +95,44 @@ def filter_blue_polys(blue_polygons, bldgs):
     return filtered_polys
 
 
+def analyze_area(area_name, bbox, catids, buildings_geojson):
+    # format the area name to title case with spaces instead of underscores
+    area_name_title = area_name.replace("_", " ").title()
+    # Get building footprints from OSM for this area
+    if buildings_geojson is not None:
+        geoms, buildings = nbblueroofs.from_geojson(buildings_geojson)
+    # instantiate an empty list to hold the results from each building
+    results_list = []
+    for catid in tqdm.tqdm(catids):
+        # Get the image (with acomp, if possible)
+        try:
+            cimage = CatalogImage(catid, band_type='MS', bbox=bbox, pansharpen=True, acomp=True)
+        except AcompUnavailable, e:
+            cimage = CatalogImage(catid, band_type='MS', bbox=bbox, pansharpen=True, acomp=False)
+        # Turn off "Fetching Image..." statements
+        cimage._read = partial(cimage._read, quiet=True)
 
+        # find the blue buildings
+        blue_polys = nbblueroofs.find_blue_polys(cimage, lower_blue_hue=.63, upper_blue_hue=.67,
+                                                 segment_blobs=True, lower_blue_saturation=.3)
+
+        if buildings_geojson is not None:
+            blue_bldgs = nbblueroofs.filter_blue_polys(blue_polys, buildings)
+        else:
+            blue_bldgs = blue_polys
+        # Store the image acquisition date
+        image_acq_date = pd.to_datetime(pd.to_datetime(cimage.ipe.metadata['image']["acquisitionDate"]).date())
+        # build a dictionary to hold the current results
+        results = {'date': image_acq_date, 'n_blue_bldgs': len(blue_polys), 'catid': catid}
+        # append current results to the full results list
+        results_list.append(results)
+    # compile the results into a data frame
+    new_results_df = pd.DataFrame(results_list)
+    # sort by data (ascending)
+    new_results_df.sort_values(by='date', inplace=True)
+    # add the area name
+    new_results_df['area'] = area_name_title
+
+    return new_results_df
 
 
