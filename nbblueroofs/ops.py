@@ -126,7 +126,7 @@ def analyze_area(area_name, bbox, catids, buildings_geojson):
         # Store the image acquisition date
         image_acq_date = pd.to_datetime(pd.to_datetime(cimage.ipe.metadata['image']["acquisitionDate"]).date())
         # build a dictionary to hold the current results
-        results = {'date': image_acq_date, 'n_blue_bldgs': len(blue_polys), 'catid': catid}
+        results = {'date': image_acq_date, 'n_blue_bldgs': len(blue_bldgs), 'catid': catid}
         # append current results to the full results list
         results_list.append(results)
     # compile the results into a data frame
