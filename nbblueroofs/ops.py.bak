@@ -55,7 +55,7 @@ def to_geojson(l):
 def labels_to_polygons(labels_array, image_affine, ignore_label=0):
     # create polygon generator object
     polygon_generator = features.shapes(labels_array.astype('uint8'),
-                                        mask=labels_array != ignore_label,
+                                        mask=labels_array <> ignore_label,
                                         transform=image_affine)
     # Extract out the individual polygons, fixing any invald geometries using buffer(0)
     polygons = [{'geometry': shape(g).buffer(0), 'properties': {'id': v}} for g, v in polygon_generator]
@@ -110,7 +110,7 @@ def analyze_area(area_name, bbox, catids, buildings_geojson):
         # Get the image (with acomp, if possible)
         try:
             cimage = CatalogImage(catid, band_type='MS', bbox=bbox, pansharpen=True, acomp=True)
-        except AcompUnavailable as e:
+        except AcompUnavailable, e:
             cimage = CatalogImage(catid, band_type='MS', bbox=bbox, pansharpen=True, acomp=False)
         # Turn off "Fetching Image..." statements
         cimage._read = partial(cimage._read, quiet=True)
