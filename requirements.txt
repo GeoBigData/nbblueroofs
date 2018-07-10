@@ -5,7 +5,7 @@ shapely
 gbdxtools
 numpy
 matplotlib
-plotly
+plotly==2.7.0
 scikit-image
 scipy
 pandas
