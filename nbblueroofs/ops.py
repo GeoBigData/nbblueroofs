@@ -8,7 +8,7 @@ import os
 from skimage import filters, morphology, measure, color, segmentation
 from scipy import ndimage as ndi
 from gbdxtools import CatalogImage
-from gbdxtools.ipe.error import AcompUnavailable
+from gbdxtools.rda.error import AcompUnavailable
 import tqdm
 import pandas as pd
 from functools import partial
@@ -124,7 +124,7 @@ def analyze_area(area_name, bbox, catids, buildings_geojson):
         else:
             blue_bldgs = blue_polys
         # Store the image acquisition date
-        image_acq_date = pd.to_datetime(pd.to_datetime(cimage.ipe.metadata['image']["acquisitionDate"]).date())
+        image_acq_date = pd.to_datetime(pd.to_datetime(cimage.rda.metadata['image']["acquisitionDate"]).date())
         # build a dictionary to hold the current results
         results = {'date': image_acq_date, 'n_blue_bldgs': len(blue_bldgs), 'catid': catid}
         # append current results to the full results list
@@ -137,5 +137,3 @@ def analyze_area(area_name, bbox, catids, buildings_geojson):
     new_results_df['area'] = area_name_title
 
     return new_results_df
-
-
